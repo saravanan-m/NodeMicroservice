@@ -4,6 +4,26 @@ const accountApiService = require('./AccountApiService')
 
 const user = db.user
 
+
+const { Kafka } = require('kafkajs')
+ 
+const kafka = new Kafka({
+  clientId: 'my-app',
+  brokers: ['localhost:9092']
+})
+ 
+const producer = kafka.producer() 
+async function sendCreateUser(payload) {
+  // Producing
+  await producer.connect()
+  await producer.send({
+    topic: 'test-topic',
+    messages: [
+        { value:JSON.stringify(payload)},
+    ],
+  })
+}
+
 exports.create = async (data) => {
     var usertmp = {
         name: data.name,
@@ -13,10 +33,8 @@ exports.create = async (data) => {
 
     usertmp = await user.create(usertmp);
     try {
-        var accountResponse = await accountApiService.createAccountApi(usertmp.mapper_id)
-        if (accountResponse.status == 200) {
-            return usertmp;
-        }
+        await sendCreateUser({ user_mapper_id: usertmp.mapper_id})
+        return usertmp;
     } catch (exception) {
         console.log(exception)
     }

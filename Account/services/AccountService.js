@@ -2,6 +2,30 @@ const db = require('../models')
 const transactionApi = require('./TransactionApiService')
 
 const account = db.account
+const { Kafka } = require('kafkajs')
+
+const kafka = new Kafka({
+    clientId: 'my-app',
+    brokers: ['localhost:9092']
+  })
+   
+const consumer = kafka.consumer({ groupId: 'test-group' })
+// Consuming
+consumer.connect()
+consumer.subscribe({ topic: 'test-topic', fromBeginning: true })
+
+consumer.run({
+  eachMessage: async ({ topic, partition, message }) => {
+    console.log({
+      partition,
+      offset: message.offset,
+      value: message.value.toString(),
+    })
+
+    this.create(JSON.parse(message.value))
+  },
+})
+
 
 exports.create = async (data) => {
     const accountTmp = {
