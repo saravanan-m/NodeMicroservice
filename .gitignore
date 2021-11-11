@@ -1,3 +1,4 @@
 User/node_modules/*
+User/package-lock.json
 Account/node_modules/*
 Transaction/node_modules/*
