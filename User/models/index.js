@@ -17,7 +17,7 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
 
 
 const db = {};
-db.user = require("./user.js")(sequelize, Sequelize.DataTypes)
+db.user = require('./user').initUserTable(sequelize)
 db.sequelize = sequelize
 
 module.exports = db

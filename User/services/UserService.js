@@ -1,52 +1,66 @@
-const db = require('../models')
-const { v4: uuidv4 } = require('uuid')
-const accountApiService = require('./AccountApiService')
+const accountService = require('./AccountService')
+const userRepositories = require('../repositories/UserRepository')
+const userResponseMaapper = require('../mappers/UserOutputMapper')
+const userInputMapper = require('../mappers/UserInputMapper')
+const { UserDto } = require('../dto/UserDto')
 
-const user = db.user
-
-exports.create = async (data) => {
-    var usertmp = {
-        name: data.name,
-        age: data.age,
-        mapper_id: uuidv4()
+/**
+ * Save user
+ * @param {UserDto} userDto - The user dto
+ * @returns {UserDto}
+ */
+const create = async (userDto) => {
+    if (await userRepositories.isUserExist(userDto.name)) {
+        return userResponseMaapper.errorResponse('user already exist')
     }
 
-    usertmp = await user.create(usertmp);
+    let savedUserDto = await userRepositories.create(userDto);
+
     try {
-        var accountResponse = await accountApiService.createAccountApi(usertmp.mapper_id)
-        if (accountResponse.status == 200) {
-            return usertmp;
+        let accountResponse = await accountService.createAccount(savedUserDto.mapper_id);
+        if (accountResponse !== undefined) {
+            savedUserDto.account = accountResponse
+        } else {
+            //this should be gracefully handled using queue
         }
     } catch (exception) {
-        console.log(exception)
+        return userResponseMaapper.errorResponse('account creation failed');
     }
 
-    //this should be gracefully handled using queue
-    return { 'status': 'account creation failed' }
+    return userResponseMaapper.successResponse(savedUserDto)
 }
 
-exports.get = async (id, withAccounts) => {
-    var userTmp = await user.findOne({
-        where: {
-            mapper_id: id
-        }
-    })
+const get = async (mapperId) => {
+    let userDto = await userRepositories.getUserByMapperId(mapperId);
+    if (userDto === undefined) {
+        return userResponseMaapper.errorResponse('user does not exist');
+    }
 
     try {
-        if (withAccounts) {
-            var accountResponse = await accountApiService.getAccountApi(id);
-            if (accountResponse.status == 200) {
-                userTmp['account'] = accountResponse.data
-            }
+        let accountDto = await accountService.getAccount(mapperId);
+        if (accountDto != undefined) {
+            userDto.account = accountDto
         }
+
     } catch (e) {
         console.log(e)
     }
 
-    return userTmp
+    return userResponseMaapper.successResponse(userDto);
 }
 
-exports.getAll = async () => {
-    return user.findAll()
+const getAll = async () => {
+    const userDtos = await userRepositories.getAllUsers();
+    await Promise.all(userDtos.map(async (userDto) => {
+        let accountDto = await accountService.getAccount(userDto.mapper_id);
+        userDto.account = accountDto
+    }));
+    return userResponseMaapper.successResponse(userDtos);;
+}
+
+module.exports = {
+    create,
+    get,
+    getAll
 }
 

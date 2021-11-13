@@ -4,12 +4,10 @@ const transactionApi = require('./TransactionApiService')
 const account = db.account
 
 exports.create = async (data) => {
-    const accountTmp = {
-        type: 'SAVINGS',
-        balance: 0,
-        user_mapper_id: data.user_mapper_id
+    const outputTmp = {
+        ...data,
+        balance: 0
     }
-
     var accountModel = await account.findOne({
         where: {
             user_mapper_id: data.user_mapper_id
@@ -17,7 +15,7 @@ exports.create = async (data) => {
     })
 
     if (accountModel == null) {
-        return await account.create(accountTmp);
+        return await account.create(outputTmp);
     }
 
     return accountModel
@@ -30,8 +28,7 @@ exports.get = async (id, withTransaction) => {
         }
     })
 
-    console.log('account' +withTransaction)
-
+    //console.log('account' +withTransaction)
     try {
         if (withTransaction) {
             var transResponse = await transactionApi.getTransactionApi(accountTmp.id);

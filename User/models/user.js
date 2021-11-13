@@ -1,5 +1,9 @@
-module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define("user", {
+const { Sequelize, DataTypes, Model } = require('sequelize');
+
+class User extends Model { }
+
+const initUserTable = (sequelize) => {
+  return User.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -15,6 +19,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     },
     account: DataTypes.VIRTUAL
-  });
-  return User;
-};
+  },
+    {
+      sequelize, // We need to pass the connection instance
+      modelName: 'user' // We need to choose the model name
+    });
+}
+
+module.exports = {
+  initUserTable,
+  User
+}
