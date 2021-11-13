@@ -14,7 +14,6 @@ const userToDtoMap = async (user) => {
     return userDto;
 }
 
-
 /**
  * User model to userdto map
  * @param {User} user - The user model

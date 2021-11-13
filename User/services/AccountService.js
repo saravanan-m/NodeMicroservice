@@ -6,14 +6,11 @@ const { AccountDto } = require('../dto/AccountDto')
 /**
  * Create account for an user
  * @param {String} userMapperId - mapper id
- * @returns {AccountDto}
+ * @returns {Promise<AccountDto>}
  */
 const createAccount = async (userMapperId) => {
    let accountDto = await accountInputMapper.accountDtoMap(userMapperId);
    const accountResposne = await accountRepository.createAccountApi(accountDto);
-
-   console.log(accountResposne.data);
-
    accountDto = await accountInputMapper.accountJsonToDtoMap(accountResposne.data);
    return accountDto
 }

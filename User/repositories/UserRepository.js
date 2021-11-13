@@ -23,7 +23,7 @@ const isUserExist = async (userName) => {
  */
 const create = async (data) => {
     const persistedUser = await user.create(data)
-    return userInputMapper.userEntityToDtoMap(persistedUser);
+    return await userInputMapper.userEntityToDtoMap(persistedUser);
 }
 
 /**
@@ -40,7 +40,7 @@ const getUserByMapperId = async (mapperId) => {
 
     let userDto = undefined;
     if (persistedUser != undefined) {
-        userDto = userInputMapper.userEntityToDtoMap(persistedUser);
+        userDto = await userInputMapper.userEntityToDtoMap(persistedUser);
     }
     return userDto;
 }
