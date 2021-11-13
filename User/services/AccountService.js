@@ -11,7 +11,12 @@ const { AccountDto } = require('../dto/AccountDto')
 const createAccount = async (userMapperId) => {
    let accountDto = await accountInputMapper.accountDtoMap(userMapperId);
    const accountResposne = await accountRepository.createAccountApi(accountDto);
-   accountDto = await accountInputMapper.accountJsonToDtoMap(accountResposne.data);
+
+   if (accountResposne != undefined) {
+      accountDto = await accountInputMapper.accountJsonToDtoMap(accountResposne.data);
+   } else {
+      accountDto = undefined;
+   }
    return accountDto
 }
 

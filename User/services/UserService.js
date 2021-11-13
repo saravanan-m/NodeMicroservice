@@ -7,7 +7,7 @@ const { UserDto } = require('../dto/UserDto')
 /**
  * Save user
  * @param {UserDto} userDto - The user dto
- * @returns {UserDto}
+ * @returns {Promise<UserDto>}
  */
 const create = async (userDto) => {
     if (await userRepositories.isUserExist(userDto.name)) {

@@ -13,6 +13,7 @@ const isUserExist = async (userName) => {
             name: userName
         }
     });
+
     return persistedUser !== null;
 }
 
